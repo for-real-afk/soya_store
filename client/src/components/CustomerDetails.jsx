@@ -24,6 +24,10 @@ export default function CustomerDetails({
   // Fetch customer orders
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['/api/users', customer?.id, 'orders'],
+    queryFn: async () => {
+      if (!customer?.id) return [];
+      return apiRequest('GET', `/api/users/${customer.id}/orders`);
+    },
     enabled: !!customer?.id,
   });
   

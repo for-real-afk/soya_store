@@ -122,12 +122,34 @@ export default function Admin() {
     ? orders 
     : orders.filter(order => order.status === orderStatusFilter);
 
+  // Handle dialog open/close
+  const handleProductDialogChange = (open) => {
+    setActiveProductDialog(prev => ({ ...prev, isOpen: open }));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-header font-bold">Admin Dashboard</h1>
         <Badge variant="outline" className="bg-warning text-white">Admin Mode</Badge>
       </div>
+      
+      {/* Product Edit Dialog */}
+      <ProductEditDialog
+        open={activeProductDialog.isOpen}
+        onOpenChange={handleProductDialogChange}
+        product={activeProductDialog.product}
+        isNew={activeProductDialog.isNew}
+      />
+      
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        entityId={productToDelete?.id}
+        entityName={productToDelete?.name}
+        entityType="product"
+      />
       
       <Tabs defaultValue="dashboard">
         <TabsList className="grid grid-cols-6 mb-8">
@@ -1022,15 +1044,87 @@ export default function Admin() {
               <CardDescription>View and manage customer accounts</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-gray-500">
-                <div className="mb-4">
-                  <Users size={48} className="mx-auto text-gray-400" />
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                    <Input className="pl-8" placeholder="Search users..." />
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Customer Management Coming Soon</h3>
-                <p>This feature is currently under development.</p>
+                
+                <div className="text-sm text-gray-500">
+                  Showing {users.length} users
+                </div>
               </div>
+              
+              {isLoadingUsers ? (
+                <div className="space-y-4">
+                  <div className="animate-pulse h-12 bg-gray-200 rounded"></div>
+                  <div className="animate-pulse h-12 bg-gray-200 rounded"></div>
+                  <div className="animate-pulse h-12 bg-gray-200 rounded"></div>
+                </div>
+              ) : users.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="mb-4">
+                    <Users size={48} className="mx-auto text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">No Customers Found</h3>
+                  <p>There are no registered users in the system yet.</p>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map(user => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">#{user.id}</TableCell>
+                          <TableCell>{user.username}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.name || '-'}</TableCell>
+                          <TableCell>
+                            {user.isAdmin ? (
+                              <Badge>Admin</Badge>
+                            ) : (
+                              <Badge variant="outline">Customer</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCustomer(user);
+                                setCustomerDialogOpen(true);
+                              }}
+                            >
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </CardContent>
           </Card>
+          
+          {/* Customer Details Dialog */}
+          <CustomerDetails
+            open={customerDialogOpen}
+            onOpenChange={setCustomerDialogOpen}
+            customer={selectedCustomer}
+          />
         </TabsContent>
         
         {/* Settings Tab */}
