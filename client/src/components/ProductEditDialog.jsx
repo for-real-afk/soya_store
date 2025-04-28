@@ -53,7 +53,8 @@ export default function ProductEditDialog({
   open, 
   onOpenChange, 
   product = null, 
-  isNew = false 
+  isNew = false,
+  category = 'products'
 }) {
   const { toast } = useToast();
   const isEditMode = !isNew && product;
@@ -65,7 +66,7 @@ export default function ProductEditDialog({
         name: '',
         description: '',
         price: 0,
-        category: 'products',
+        category: category, // Use the category passed from parent
         subcategory: '',
         imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6e9b58',
         isFeatured: false,
@@ -131,11 +132,17 @@ export default function ProductEditDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+          <DialogTitle>
+            {isEditMode 
+              ? `Edit ${product.category === 'seeds' ? 'Seed' : 'Product'}`
+              : `Add New ${category === 'seeds' ? 'Seed' : 'Product'}`
+            }
+          </DialogTitle>
           <DialogDescription>
             {isEditMode 
-              ? 'Update product details in your inventory'
-              : 'Add a new product to your inventory'}
+              ? `Update ${product.category === 'seeds' ? 'seed' : 'product'} details in your inventory`
+              : `Add a new ${category === 'seeds' ? 'seed' : 'product'} to your inventory`
+            }
           </DialogDescription>
         </DialogHeader>
         
@@ -367,7 +374,10 @@ export default function ProductEditDialog({
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending 
                   ? 'Saving...' 
-                  : isEditMode ? 'Update Product' : 'Add Product'}
+                  : isEditMode 
+                    ? `Update ${product.category === 'seeds' ? 'Seed' : 'Product'}`
+                    : `Add ${category === 'seeds' ? 'Seed' : 'Product'}`
+                }
               </Button>
             </DialogFooter>
           </form>
