@@ -5,6 +5,7 @@ import { insertUserSchema, insertOrderSchema, addressSchema, cartItemSchema } fr
 import express from "express";
 import { z } from "zod";
 import DOMPurify from "isomorphic-dompurify";
+import { processMessage, getChatbotInfo } from "./chatbot-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // put application routes here
@@ -294,6 +295,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user orders" });
+    }
+  });
+
+  // Chatbot endpoints
+  app.post("/api/chatbot/message", processMessage);
+  app.get("/api/chatbot/info", getChatbotInfo);
+
+  // Product recommendations endpoint
+  app.get("/api/recommendations", async (req, res) => {
+    try {
+      // Get query parameters
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const category = req.query.category ? DOMPurify.sanitize(req.query.category as string) : undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 4;
+      
+      // Get all products first
+      let products = await storage.getProducts();
+      
+      // If there's a category filter, apply it
+      if (category) {
+        products = products.filter(p => p.category === category);
+      }
+      
+      // For now, we'll use a simple recommendation algorithm:
+      // 1. If user is logged in, prioritize products in the same categories they've purchased
+      // 2. Prioritize featured and best-selling products
+      // 3. Add some randomness for discovery
+      
+      let recommendedProducts = [...products];
+      
+      // If userId is provided, check their order history
+      if (userId) {
+        try {
+          const userOrders = await storage.getOrdersByUserId(userId);
+          
+          // Extract products from past orders
+          const pastOrderItems: any[] = [];
+          userOrders.forEach(order => {
+            if (typeof order.items === 'string') {
+              try {
+                const items = JSON.parse(order.items);
+                pastOrderItems.push(...items);
+              } catch (e) {
+                console.error('Error parsing order items:', e);
+              }
+            } else if (Array.isArray(order.items)) {
+              pastOrderItems.push(...order.items);
+            }
+          });
+          
+          // Get categories from past purchases
+          const purchasedCategories = new Set<string>();
+          pastOrderItems.forEach((item: any) => {
+            if (item.category) {
+              purchasedCategories.add(item.category);
+            }
+          });
+          
+          // Boost products from purchased categories
+          if (purchasedCategories.size > 0) {
+            recommendedProducts.sort((a, b) => {
+              const aInPurchasedCategory = purchasedCategories.has(a.category) ? 1 : 0;
+              const bInPurchasedCategory = purchasedCategories.has(b.category) ? 1 : 0;
+              return bInPurchasedCategory - aInPurchasedCategory;
+            });
+          }
+        } catch (error) {
+          console.error('Error getting user order history for recommendations:', error);
+        }
+      }
+      
+      // Prioritize featured and best sellers, with a slight random factor
+      recommendedProducts.sort((a, b) => {
+        const aScore = (a.isFeatured ? 3 : 0) + (a.isBestSeller ? 2 : 0) + Math.random();
+        const bScore = (b.isFeatured ? 3 : 0) + (b.isBestSeller ? 2 : 0) + Math.random();
+        return bScore - aScore;
+      });
+      
+      // Return the top N results
+      res.json(recommendedProducts.slice(0, limit));
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate recommendations" });
     }
   });
 
