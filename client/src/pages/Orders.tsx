@@ -169,7 +169,7 @@ export default function Orders() {
                     orders.map(order => (
                       <TableRow key={order.id}>
                         <TableCell className="font-medium">#{order.id}</TableCell>
-                        <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-'}</TableCell>
                         <TableCell>
                           <OrderStatus status={order.status} />
                         </TableCell>
