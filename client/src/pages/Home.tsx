@@ -14,9 +14,37 @@ import {
   ChevronRight
 } from "lucide-react";
 import { useShop } from "@/context/ShopContext";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const { addToCart } = useShop();
+  const { login, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  
+  // Auto login for testing purposes (remove in production)
+  useEffect(() => {
+    const autoLogin = async () => {
+      if (!isAuthenticated) {
+        try {
+          // Try to login with admin account first
+          const success = await login("admin", "admin123");
+          if (success) {
+            toast({
+              title: "Auto Login Successful",
+              description: "Logged in as admin for testing purposes",
+            });
+          } else {
+            // If admin login fails, try auto-registering first in backend
+          }
+        } catch (error) {
+          console.error("Auto login failed:", error);
+        }
+      }
+    };
+    
+    autoLogin();
+  }, [isAuthenticated, login, toast]);
 
   const { data: featuredProducts = [], isLoading } = useQuery<Product[]>({
     queryKey: ['/api/products/featured'],
