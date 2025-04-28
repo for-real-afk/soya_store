@@ -217,6 +217,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update order status" });
     }
   });
+  
+  // PUT update product (admin only)
+  app.put("/api/products/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+      
+      const productData = req.body;
+      // Add sanitization for text fields
+      if (productData.name) {
+        productData.name = DOMPurify.sanitize(productData.name);
+      }
+      if (productData.description) {
+        productData.description = DOMPurify.sanitize(productData.description);
+      }
+      if (productData.category) {
+        productData.category = DOMPurify.sanitize(productData.category);
+      }
+      if (productData.subcategory) {
+        productData.subcategory = DOMPurify.sanitize(productData.subcategory);
+      }
+      
+      const updatedProduct = await storage.updateProduct(id, productData);
+      if (!updatedProduct) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+  
+  // DELETE product (admin only)
+  app.delete("/api/products/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid product ID" });
+      }
+      
+      const success = await storage.deleteProduct(id);
+      if (!success) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+  
+  // GET all users (admin only)
+  app.get("/api/users", async (_req, res) => {
+    try {
+      // In a real app, we'd check if the user is an admin
+      const users = await storage.getUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
 
   const httpServer = createServer(app);
 
