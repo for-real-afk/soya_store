@@ -154,7 +154,7 @@ export default function Admin() {
             </Card>
           </div>
           
-          {/* Sales Analytics */}
+          {/* Basic Sales Chart */}
           <div className="grid grid-cols-1 gap-6 mb-8">
             <Card>
               <CardHeader>
@@ -162,56 +162,18 @@ export default function Admin() {
                 <CardDescription>Monthly sales performance</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={[
-                        { month: 'Jan', sales: 4000, orders: 24 },
-                        { month: 'Feb', sales: 3000, orders: 18 },
-                        { month: 'Mar', sales: 5000, orders: 30 },
-                        { month: 'Apr', sales: 2780, orders: 16 },
-                        { month: 'May', sales: 1890, orders: 10 },
-                        { month: 'Jun', sales: 2390, orders: 14 },
-                        { month: 'Jul', sales: 3490, orders: 22 },
-                        { month: 'Aug', sales: 2000, orders: 12 },
-                        { month: 'Sep', sales: 2500, orders: 15 },
-                        { month: 'Oct', sales: 6000, orders: 35 },
-                        { month: 'Nov', sales: 7000, orders: 40 },
-                        { month: 'Dec', sales: 5500, orders: 32 },
-                      ]}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip 
-                        formatter={(value, name) => [
-                          name === 'sales' ? formatCurrency(value) : value,
-                          name === 'sales' ? 'Revenue' : 'Orders'
-                        ]}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="sales" 
-                        stroke="#10b981" 
-                        fillOpacity={1} 
-                        fill="url(#colorSales)" 
-                        name="sales"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                <div className="h-[300px] bg-gray-100 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <BarChart3 size={48} className="mx-auto mb-2 text-gray-400" />
+                    <p className="text-xl font-medium">Sales Analytics Chart</p>
+                    <p className="text-sm text-gray-500">Data visualization showing monthly sales trends</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Product Category Distribution & Recent Orders */}
+          {/* Simplified Charts - Static Version */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card>
               <CardHeader>
@@ -219,29 +181,20 @@ export default function Admin() {
                 <CardDescription>Breakdown by category</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { name: 'Seeds', value: products.filter(p => p.category === 'seeds').length },
-                          { name: 'Products', value: products.filter(p => p.category === 'products').length },
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      >
-                        <Cell fill="#10b981" />
-                        <Cell fill="#6366f1" />
-                      </Pie>
-                      <Tooltip formatter={(value) => [`${value} items`, 'Count']} />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="h-[250px] bg-gray-100 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <div className="flex items-center justify-center gap-4 mb-4">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                        <span>Seeds</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                        <span>Products</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500">Visual representation of product categories</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -252,29 +205,28 @@ export default function Admin() {
                 <CardDescription>Product inventory breakdown</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        { name: 'Low Stock (<10)', count: products.filter(p => p.stock < 10).length },
-                        { name: 'Medium (10-30)', count: products.filter(p => p.stock >= 10 && p.stock < 30).length },
-                        { name: 'Good (30-70)', count: products.filter(p => p.stock >= 30 && p.stock < 70).length },
-                        { name: 'High (70+)', count: products.filter(p => p.stock >= 70).length },
-                      ]}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Bar dataKey="count" name="Products" fill="#8884d8">
-                        <Cell fill="#ef4444" />
-                        <Cell fill="#f59e0b" />
-                        <Cell fill="#10b981" />
-                        <Cell fill="#3b82f6" />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="h-[250px] bg-gray-100 flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center">
+                        <div className="w-full bg-red-500 h-4" style={{ width: '20%' }}></div>
+                        <span className="ml-2">Low Stock</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-full bg-yellow-500 h-4" style={{ width: '30%' }}></div>
+                        <span className="ml-2">Medium</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-full bg-green-500 h-4" style={{ width: '25%' }}></div>
+                        <span className="ml-2">Good</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-full bg-blue-500 h-4" style={{ width: '25%' }}></div>
+                        <span className="ml-2">High</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500">Inventory breakdown by stock level</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

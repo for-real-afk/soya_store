@@ -18,6 +18,7 @@ import Register from "@/pages/Register";
 import Profile from "@/pages/Profile";
 import Orders from "@/pages/Orders";
 import Admin from "@/pages/Admin";
+import AdminTest from "@/pages/AdminTest";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -49,6 +50,11 @@ function Router() {
       <Route path="/admin">
         <ProtectedRoute adminOnly>
           <Admin />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/admin-test">
+        <ProtectedRoute adminOnly>
+          <AdminTest />
         </ProtectedRoute>
       </Route>
       
