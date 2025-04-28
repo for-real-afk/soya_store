@@ -13,6 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatCurrency } from "@/lib/utils";
 import OrderStatus from "@/components/OrderStatus";
+// Import recharts components
+import {
+  LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
+} from 'recharts';
 import {
   Package,
   ShoppingBag,
@@ -149,6 +154,133 @@ export default function Admin() {
             </Card>
           </div>
           
+          {/* Sales Analytics */}
+          <div className="grid grid-cols-1 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sales Analytics</CardTitle>
+                <CardDescription>Monthly sales performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={[
+                        { month: 'Jan', sales: 4000, orders: 24 },
+                        { month: 'Feb', sales: 3000, orders: 18 },
+                        { month: 'Mar', sales: 5000, orders: 30 },
+                        { month: 'Apr', sales: 2780, orders: 16 },
+                        { month: 'May', sales: 1890, orders: 10 },
+                        { month: 'Jun', sales: 2390, orders: 14 },
+                        { month: 'Jul', sales: 3490, orders: 22 },
+                        { month: 'Aug', sales: 2000, orders: 12 },
+                        { month: 'Sep', sales: 2500, orders: 15 },
+                        { month: 'Oct', sales: 6000, orders: 35 },
+                        { month: 'Nov', sales: 7000, orders: 40 },
+                        { month: 'Dec', sales: 5500, orders: 32 },
+                      ]}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          name === 'sales' ? formatCurrency(value) : value,
+                          name === 'sales' ? 'Revenue' : 'Orders'
+                        ]}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="sales" 
+                        stroke="#10b981" 
+                        fillOpacity={1} 
+                        fill="url(#colorSales)" 
+                        name="sales"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Product Category Distribution & Recent Orders */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Category Distribution</CardTitle>
+                <CardDescription>Breakdown by category</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Seeds', value: products.filter(p => p.category === 'seeds').length },
+                          { name: 'Products', value: products.filter(p => p.category === 'products').length },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        <Cell fill="#10b981" />
+                        <Cell fill="#6366f1" />
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value} items`, 'Count']} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Inventory by Stock Level</CardTitle>
+                <CardDescription>Product inventory breakdown</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[
+                        { name: 'Low Stock (<10)', count: products.filter(p => p.stock < 10).length },
+                        { name: 'Medium (10-30)', count: products.filter(p => p.stock >= 10 && p.stock < 30).length },
+                        { name: 'Good (30-70)', count: products.filter(p => p.stock >= 30 && p.stock < 70).length },
+                        { name: 'High (70+)', count: products.filter(p => p.stock >= 70).length },
+                      ]}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip />
+                      <Bar dataKey="count" name="Products" fill="#8884d8">
+                        <Cell fill="#ef4444" />
+                        <Cell fill="#f59e0b" />
+                        <Cell fill="#10b981" />
+                        <Cell fill="#3b82f6" />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Orders & Low Stock Products */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
