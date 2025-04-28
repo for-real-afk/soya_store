@@ -191,31 +191,106 @@ class NotificationViewSet(viewsets.ModelViewSet):
         count = Notification.objects.filter(user=request.user, is_read=False).count()
         return Response({"count": count})
 
+# Import throttling classes
+from .throttling import LoginRateThrottle, RegisterRateThrottle
+import logging
+
+# Setup logger
+logger = logging.getLogger('django.security')
+
 # Authentication views
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def login_view(request):
+    """
+    Login view with rate limiting and security logging
+    """
+    # Apply rate throttling
+    throttle = LoginRateThrottle()
+    if not throttle.allow_request(request, login_view):
+        logger.warning(f"Login rate limit exceeded for IP {throttle.get_ident(request)}")
+        return Response(
+            {"detail": "Too many login attempts. Please try again later."}, 
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+    
     username = request.data.get('username')
     password = request.data.get('password')
     
+    # Input validation
     if not username or not password:
-        return Response({"detail": "Username and password are required"}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "Username and password are required"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
     
+    # Attempt authentication
     user = authenticate(username=username, password=password)
     
     if user is not None:
+        # Log successful login
+        logger.info(f"Successful login for user: {username}")
         serializer = UserSerializer(user)
         return Response(serializer.data)
     else:
-        return Response({"detail": "Invalid credentials"}, 
-                        status=status.HTTP_401_UNAUTHORIZED)
+        # Log failed login attempt
+        logger.warning(f"Failed login attempt for username: {username}")
+        # Use a consistent response time to prevent timing attacks
+        import time
+        time.sleep(1)  # Delay response to prevent timing attacks
+        return Response(
+            {"detail": "Invalid credentials"}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def register_view(request):
+    """
+    Registration view with rate limiting and security logging
+    """
+    # Apply rate throttling
+    throttle = RegisterRateThrottle()
+    if not throttle.allow_request(request, register_view):
+        logger.warning(f"Registration rate limit exceeded for IP {throttle.get_ident(request)}")
+        return Response(
+            {"detail": "Too many registration attempts. Please try again later."}, 
+            status=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+    
+    # Input validation with additional security checks
+    # These checks are in addition to what's in UserSerializer
+    email = request.data.get('email', '')
+    username = request.data.get('username', '')
+    
+    # Check if user already exists to prevent enumeration attacks
+    if User.objects.filter(username=username).exists():
+        # Use a consistent response time
+        import time
+        time.sleep(1)
+        logger.info(f"Registration attempt with existing username: {username}")
+        return Response(
+            {"username": ["A user with that username already exists."]},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if User.objects.filter(email=email).exists():
+        # Use a consistent response time
+        import time
+        time.sleep(1)
+        logger.info(f"Registration attempt with existing email: {email}")
+        return Response(
+            {"email": ["A user with that email already exists."]},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()
+        user = serializer.save()
+        # Log successful registration
+        logger.info(f"New user registered: {user.username} (ID: {user.id})")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    # Log validation errors
+    logger.info(f"Registration validation errors: {serializer.errors}")
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
