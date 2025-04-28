@@ -185,8 +185,10 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',  # Limit anonymous users to 100 requests per day
-        'user': '1000/day',  # Limit authenticated users to 1000 requests per day
+        'anon': '100/day',        # Limit anonymous users to 100 requests per day
+        'user': '1000/day',       # Limit authenticated users to 1000 requests per day
+        'login': '5/minute',      # Limit login attempts to 5 per minute
+        'register': '3/hour',     # Limit registration to 3 per hour
     },
     # Exception handling
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
