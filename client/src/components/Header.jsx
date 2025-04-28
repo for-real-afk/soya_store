@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
+import NotificationButton from "@/components/NotificationButton";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -167,6 +168,13 @@ export default function Header() {
                 </PopoverContent>
               </Popover>
             </div>
+            
+            {/* Notifications - Only show for authenticated users */}
+            {isAuthenticated && (
+              <div className="relative">
+                <NotificationButton />
+              </div>
+            )}
             
             {/* Cart */}
             <div className="relative">

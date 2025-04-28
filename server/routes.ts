@@ -164,6 +164,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch orders" });
     }
   });
+  
+  // GET orders for current user (simplified route)
+  app.get("/api/orders/user", async (req, res) => {
+    try {
+      // In a real app, we'd get the user ID from the JWT token
+      // For now, we'll use a default user for testing
+      const userId = 1; // Assume admin user for testing
+      
+      const orders = await storage.getOrdersByUserId(userId);
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch user orders" });
+    }
+  });
 
   // GET all orders (admin only)
   app.get("/api/orders", async (req, res) => {

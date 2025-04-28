@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/context/AuthContext";
 import { ShopProvider } from "@/context/ShopContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
@@ -70,12 +71,14 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="light">
         <AuthProvider>
           <ShopProvider>
-            <TooltipProvider>
-              <Layout>
-                <Router />
-              </Layout>
-              <Toaster />
-            </TooltipProvider>
+            <NotificationProvider>
+              <TooltipProvider>
+                <Layout>
+                  <Router />
+                </Layout>
+                <Toaster />
+              </TooltipProvider>
+            </NotificationProvider>
           </ShopProvider>
         </AuthProvider>
       </ThemeProvider>
