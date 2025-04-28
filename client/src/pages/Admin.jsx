@@ -68,6 +68,7 @@ ChartJS.register(
 export default function Admin() {
   const { toast } = useToast();
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("dashboard");
   
   // State for dialogs
   const [activeProductDialog, setActiveProductDialog] = useState({ isOpen: false, product: null, isNew: false });
@@ -152,7 +153,11 @@ export default function Admin() {
         entityType="product"
       />
       
-      <Tabs defaultValue="dashboard">
+      <Tabs 
+        defaultValue="dashboard" 
+        value={activeTab}
+        onValueChange={value => setActiveTab(value)}
+      >
         {/* Custom tabs display for mobile - scrollable horizontal tabs */}
         <div className="md:hidden overflow-x-auto pb-2 mb-4">
           <TabsList className="flex w-auto min-w-max space-x-1">
