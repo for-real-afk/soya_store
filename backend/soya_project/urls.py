@@ -20,7 +20,7 @@ from rest_framework.documentation import include_docs_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('soya_store.urls')),
-    path('api-auth/', include('rest_framework.urls')),
-    path('docs/', include_docs_urls(title='Soya Store API')),
+    path('api/', include('soya_store.urls')),  # Include the app's URLs
+    path('api-auth/', include('rest_framework.urls')),  # DRF browsable API authentication
+    path('docs/', include_docs_urls(title='Soya Bean Store API')),  # API documentation
 ]
