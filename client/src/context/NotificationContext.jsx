@@ -25,22 +25,49 @@ export function NotificationProvider({ children }) {
       
       // Check if there are any orders with updates
       // In a real app, we'd store the last viewed status and compare with current
-      // For demo purposes, we'll create notifications for non-pending orders
       orders.forEach(order => {
-        if (order.status !== 'pending') {
-          const notification = {
-            id: `order-${order.id}-${order.status}`,
-            title: `Order #${order.id} Update`,
-            description: `Your order status has been updated to ${order.status}`,
-            timestamp: new Date(order.updatedAt || order.createdAt),
-            read: false,
-            type: 'order_update',
-            orderId: order.id,
-            status: order.status
-          };
-          
-          unreadNotifications.push(notification);
+        // Create status-specific notification text
+        let statusDescription = '';
+        let statusTitle = '';
+        
+        switch(order.status) {
+          case 'pending':
+            statusTitle = 'Order Received';
+            statusDescription = 'Your order has been received and is awaiting processing.';
+            break;
+          case 'processing':
+            statusTitle = 'Order Processing';
+            statusDescription = 'Your order is being processed! We\'ll let you know when it ships.';
+            break;
+          case 'shipped':
+            statusTitle = 'Order Shipped';
+            statusDescription = 'Great news! Your order is on its way to you.';
+            break;
+          case 'delivered':
+            statusTitle = 'Order Delivered';
+            statusDescription = 'Your order has been delivered! Enjoy your products.';
+            break;
+          case 'cancelled':
+            statusTitle = 'Order Cancelled';
+            statusDescription = 'Your order has been cancelled. Please contact us for any questions.';
+            break;
+          default:
+            statusTitle = 'Order Update';
+            statusDescription = `Your order status has been updated to ${order.status}`;
         }
+        
+        const notification = {
+          id: `order-${order.id}-${order.status}`,
+          title: `${statusTitle} - Order #${order.id}`,
+          description: statusDescription,
+          timestamp: new Date(order.updatedAt || order.createdAt),
+          read: false,
+          type: 'order_update',
+          orderId: order.id,
+          status: order.status
+        };
+        
+        unreadNotifications.push(notification);
       });
       
       if (unreadNotifications.length > 0) {

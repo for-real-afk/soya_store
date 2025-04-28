@@ -309,6 +309,52 @@ export class DatabaseStorage implements IStorage {
       // Add all products
       await db.insert(products).values(productSeedData);
     }
+    
+    // Check if orders table is empty and seed test orders
+    const existingOrders = await db.select().from(orders);
+    if (existingOrders.length === 0) {
+      // Sample order data for notification testing
+      const testOrder1 = {
+        userId: 1, // Admin user
+        total: 56.99,
+        status: 'pending',
+        items: [
+          { productId: 1, name: "Organic Soybean Seeds", price: 24.99, quantity: 1 },
+          { productId: 2, name: "Organic Soy Milk", price: 15.99, quantity: 2 }
+        ],
+        shippingAddress: {
+          street: "123 Test Street",
+          city: "Testville",
+          state: "TS",
+          zip: "12345",
+          country: "Test Country"
+        },
+        paymentMethod: "credit_card",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const testOrder2 = {
+        userId: 1, // Admin user
+        total: 89.97,
+        status: 'processing',
+        items: [
+          { productId: 3, name: "Organic Tofu", price: 29.99, quantity: 3 }
+        ],
+        shippingAddress: {
+          street: "456 Demo Avenue",
+          city: "Demo City",
+          state: "DC",
+          zip: "67890",
+          country: "Demo Country"
+        },
+        paymentMethod: "paypal",
+        createdAt: new Date(Date.now() - 86400000), // 1 day ago
+        updatedAt: new Date()
+      };
+      
+      await db.insert(orders).values([testOrder1, testOrder2]);
+    }
   }
 }
 
