@@ -11,6 +11,12 @@ export default function Header() {
   const { toggleCart, cartItemCount } = useShop();
   const { user, isAuthenticated, isAdmin, isAdminView, toggleAdminView, logout } = useAuth();
   const [location] = useLocation();
+  
+  // Debug admin status
+  console.log("User:", user);
+  console.log("Is user admin?", user?.isAdmin);
+  console.log("isAdmin context value:", isAdmin);
+  console.log("isAdminView context value:", isAdminView);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(prev => !prev);
@@ -121,13 +127,7 @@ export default function Header() {
                       <Link href="/orders" className="block px-3 py-2 hover:bg-light rounded-md text-sm">
                         <i className="fas fa-box mr-2"></i> Order Tracking
                       </Link>
-                      <button 
-                        onClick={logout}
-                        className="block w-full text-left px-3 py-2 hover:bg-light rounded-md text-sm"
-                      >
-                        <i className="fas fa-sign-out-alt mr-2"></i> Sign Out
-                      </button>
-                      {isAdmin && (
+                      {user?.isAdmin && (
                         <>
                           <hr className="my-2" />
                           <button 
@@ -137,8 +137,18 @@ export default function Header() {
                             <i className="fas fa-user-shield mr-2"></i> 
                             {isAdminView ? "Customer View" : "Admin View"}
                           </button>
+                          <Link href="/admin" className="block px-3 py-2 hover:bg-light rounded-md text-sm text-warning">
+                            <i className="fas fa-cog mr-2"></i> Admin Dashboard
+                          </Link>
                         </>
                       )}
+                      <button 
+                        onClick={logout}
+                        className="block w-full text-left px-3 py-2 hover:bg-light rounded-md text-sm"
+                      >
+                        <i className="fas fa-sign-out-alt mr-2"></i> Sign Out
+                      </button>
+                      
                     </div>
                   ) : (
                     <div className="space-y-3">
