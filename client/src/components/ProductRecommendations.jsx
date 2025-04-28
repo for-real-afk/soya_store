@@ -1,106 +1,148 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { useAuth } from '../context/AuthContext';
-import { useLanguage } from '../context/LanguageContext';
-import { 
-  getPersonalizedRecommendations,
-  getRelatedProducts,
-  getFrequentlyBoughtTogether 
-} from '../lib/recommendationService';
+import { useAuth } from '@/context/AuthContext';
+import { getRecommendations } from '@/lib/chatbotService';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ShoppingCart, Sparkles } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+import { useShop } from '@/context/ShopContext';
 
 const ProductRecommendations = ({ 
-  products, 
-  currentProduct = null, 
-  type = 'personalized',
+  title = 'Recommended For You', 
+  category = null,
   limit = 4,
-  className = '' 
+  showTitle = true
 }) => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { addToCart } = useShop();
   const [recommendations, setRecommendations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!Array.isArray(products) || products.length === 0) {
-      setRecommendations([]);
-      return;
-    }
-
-    let recommendedProducts = [];
-
-    switch (type) {
-      case 'related':
-        // For product detail pages - show related products
-        if (currentProduct) {
-          recommendedProducts = getRelatedProducts(products, currentProduct, limit);
+    const fetchRecommendations = async () => {
+      setIsLoading(true);
+      try {
+        const options = {
+          userId: user?.id,
+          limit
+        };
+        
+        if (category) {
+          options.category = category;
         }
-        break;
-      case 'frequently-bought-together':
-        // For product detail pages - show products often bought together
-        if (currentProduct) {
-          recommendedProducts = getFrequentlyBoughtTogether(products, currentProduct, limit);
-        }
-        break;
-      case 'personalized':
-      default:
-        // For homepage or user account - show personalized recommendations
-        recommendedProducts = getPersonalizedRecommendations(products, user, limit);
-        break;
-    }
+        
+        const data = await getRecommendations(options);
+        setRecommendations(data);
+      } catch (error) {
+        console.error('Error fetching recommendations:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchRecommendations();
+  }, [user, category, limit]);
 
-    setRecommendations(recommendedProducts);
-  }, [products, currentProduct, type, user, limit]);
+  // Handle adding item to cart
+  const handleAddToCart = (product) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      image: product.imageUrl,
+      category: product.category
+    });
+  };
 
-  if (!recommendations.length) {
+  if (isLoading) {
+    return (
+      <div className="mt-8">
+        {showTitle && <h2 className="text-2xl font-semibold mb-4">{title}</h2>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array(limit).fill(0).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <div className="aspect-square w-full relative bg-gray-100">
+                <Skeleton className="h-full w-full" />
+              </div>
+              <CardHeader className="p-4">
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardFooter className="p-4 pt-0 flex justify-between">
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (recommendations.length === 0) {
     return null;
   }
 
-  const getTitle = () => {
-    switch (type) {
-      case 'related':
-        return t('youMightAlsoLike');
-      case 'frequently-bought-together':
-        return t('frequentlyBoughtTogether');
-      case 'personalized':
-      default:
-        return t('recommendations');
-    }
-  };
-
   return (
-    <div className={`my-6 ${className}`}>
-      <h3 className="text-lg font-medium mb-4">{getTitle()}</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {recommendations.map(product => (
-          <div 
-            key={product.id} 
-            className="rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow"
-          >
-            <Link href={`/products/${product.id}`}>
-              <a className="block">
-                <div className="aspect-w-1 aspect-h-1 w-full">
+    <div className="mt-8">
+      {showTitle && (
+        <div className="flex items-center mb-4">
+          <Sparkles className="text-amber-500 mr-2 h-5 w-5" />
+          <h2 className="text-2xl font-semibold">{title}</h2>
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {recommendations.map((product) => (
+          <Card key={product.id} className="overflow-hidden group hover:shadow-md transition-shadow">
+            <Link href={`/product/${product.id}`}>
+              <div className="cursor-pointer">
+                <div className="aspect-square w-full relative bg-gray-50 overflow-hidden">
                   <img 
-                    src={product.image_url || '/placeholder-image.jpg'} 
+                    src={product.imageUrl} 
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="object-cover h-full w-full group-hover:scale-105 transition-transform duration-300"
                   />
+                  {product.isOnSale && (
+                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                      SALE
+                    </div>
+                  )}
+                  {product.isBestSeller && (
+                    <div className="absolute top-2 left-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded">
+                      BEST SELLER
+                    </div>
+                  )}
                 </div>
-                <div className="p-3">
-                  <h4 className="font-medium text-sm line-clamp-2">{product.name}</h4>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-green-600 font-bold">
-                      ${product.price?.toFixed(2)}
-                    </span>
-                    {product.rating && (
-                      <div className="flex items-center text-xs text-gray-500">
-                        <span className="text-yellow-500 mr-1">★</span>
-                        <span>{product.rating}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </a>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-lg font-medium line-clamp-1">{product.name}</CardTitle>
+                  <CardDescription className="line-clamp-2">{product.description}</CardDescription>
+                </CardHeader>
+              </div>
             </Link>
-          </div>
+            <CardFooter className="p-4 pt-0 flex justify-between items-center">
+              <div>
+                {product.isOnSale ? (
+                  <div className="flex flex-col">
+                    <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
+                    <span className="text-gray-500 text-sm line-through">{formatCurrency(product.originalPrice)}</span>
+                  </div>
+                ) : (
+                  <span className="font-bold text-primary">{formatCurrency(product.price)}</span>
+                )}
+              </div>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={() => handleAddToCart(product)}
+                title="Add to cart"
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
         ))}
       </div>
     </div>

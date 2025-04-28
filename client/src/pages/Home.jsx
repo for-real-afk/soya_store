@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProductCard from "@/components/ProductCard";
+import ProductRecommendations from "@/components/ProductRecommendations";
 import { 
   Leaf, 
   Truck, 
@@ -288,6 +289,16 @@ export default function Home() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Personalized Recommendations Section */}
+      <section className="py-16 border-t">
+        <div className="container mx-auto px-4">
+          <ProductRecommendations 
+            title="Recommended For You" 
+            limit={4}
+          />
         </div>
       </section>
 

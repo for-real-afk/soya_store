@@ -23,6 +23,7 @@ import {
   ChevronRight 
 } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
+import ProductRecommendations from "@/components/ProductRecommendations";
 
 export default function ProductDetail() {
   const [match, params] = useRoute("/product/:id");
@@ -354,34 +355,14 @@ export default function ProductDetail() {
         </Tabs>
       </div>
 
-      {/* Related Products */}
-      {filteredRelatedProducts.length > 0 && (
-        <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="font-header text-xl md:text-2xl font-bold">You May Also Like</h2>
-            <Link href={`/${product.category}`} className="text-primary hover:underline font-semibold flex items-center">
-              View All <ChevronRight size={16} className="ml-1" />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {isRelatedLoading ? (
-              [...Array(4)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-gray-200 aspect-square rounded-lg"></div>
-                  <div className="mt-3 h-4 bg-gray-200 rounded w-1/4"></div>
-                  <div className="mt-2 h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="mt-2 h-3 bg-gray-200 rounded w-2/4"></div>
-                </div>
-              ))
-            ) : (
-              filteredRelatedProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            )}
-          </div>
-        </div>
-      )}
+      {/* Smart Recommendations */}
+      <div className="mb-12">
+        <ProductRecommendations 
+          title="You May Also Like" 
+          category={product.category}
+          limit={4}
+        />
+      </div>
     </div>
   );
 }
