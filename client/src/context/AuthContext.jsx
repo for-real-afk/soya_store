@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { USER_ROLES } from "@shared/schema";
 
 const AuthContext = createContext(undefined);
 
@@ -47,13 +48,14 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (username, password, email, name) => {
+  const register = async (username, password, email, name, role = USER_ROLES.CUSTOMER) => {
     try {
       const response = await apiRequest("POST", "/api/users/register", { 
         username, 
         password, 
         email,
-        name 
+        name,
+        role 
       });
       
       const userData = await response.json();
@@ -102,6 +104,12 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Role check helper functions
+  const hasRole = (role) => {
+    if (!user) return false;
+    return user.role === role || user.role === USER_ROLES.ADMIN;
+  };
+  
   const value = {
     user,
     isAuthenticated: !!user,
@@ -110,7 +118,13 @@ export function AuthProvider({ children }) {
     toggleAdminView,
     login,
     register,
-    logout
+    logout,
+    // Role-specific getters
+    isSeedManager: hasRole(USER_ROLES.SEED_MANAGER),
+    isProductManager: hasRole(USER_ROLES.PRODUCT_MANAGER),
+    // Permission checks
+    canManageSeeds: !!user && (user.role === USER_ROLES.ADMIN || user.role === USER_ROLES.SEED_MANAGER),
+    canManageProducts: !!user && (user.role === USER_ROLES.ADMIN || user.role === USER_ROLES.PRODUCT_MANAGER),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

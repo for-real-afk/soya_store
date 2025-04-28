@@ -184,7 +184,8 @@ export class DatabaseStorage implements IStorage {
         password: "admin123",
         email: "admin@organicbeans.com",
         name: "Admin User",
-        isAdmin: true
+        isAdmin: true,
+        role: "admin"
       }).returning();
       
       // Seed products

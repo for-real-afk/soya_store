@@ -36,6 +36,7 @@ import {
   Package,
   ShoppingBag,
   Users,
+  UsersRound,
   BarChart3,
   Sliders,
   Search,
@@ -185,11 +186,15 @@ export default function Admin() {
               <Sliders size={16} />
               <span className="ml-1">Settings</span>
             </TabsTrigger>
+            <TabsTrigger value="users" className="flex-shrink-0">
+              <UsersRound size={16} />
+              <span className="ml-1">Users</span>
+            </TabsTrigger>
           </TabsList>
         </div>
         
         {/* Desktop tabs - Grid based layout */}
-        <TabsList className="hidden md:grid grid-cols-6 mb-8">
+        <TabsList className="hidden md:grid grid-cols-7 mb-8">
           <TabsTrigger value="dashboard">
             <BarChart3 size={16} className="mr-2" /> Dashboard
           </TabsTrigger>
@@ -207,6 +212,9 @@ export default function Admin() {
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Sliders size={16} className="mr-2" /> Settings
+          </TabsTrigger>
+          <TabsTrigger value="users">
+            <UsersRound size={16} className="mr-2" /> Users
           </TabsTrigger>
         </TabsList>
         

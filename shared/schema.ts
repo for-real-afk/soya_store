@@ -2,6 +2,14 @@ import { pgTable, text, serial, integer, boolean, timestamp, real, jsonb } from 
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User roles enum
+export const USER_ROLES = {
+  ADMIN: "admin",
+  SEED_MANAGER: "seed_manager",
+  PRODUCT_MANAGER: "product_manager",
+  CUSTOMER: "customer"
+} as const;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -9,6 +17,7 @@ export const users = pgTable("users", {
   email: text("email").notNull(),
   name: text("name"),
   isAdmin: boolean("is_admin").default(false),
+  role: text("role").notNull().default(USER_ROLES.CUSTOMER),
 });
 
 export const products = pgTable("products", {
@@ -45,6 +54,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   email: true,
   name: true,
+  role: true,
 });
 
 export const insertProductSchema = createInsertSchema(products).pick({
