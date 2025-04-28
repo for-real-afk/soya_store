@@ -29,6 +29,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ProductCard from "@/components/ProductCard";
 import { filterProducts, sortProducts } from "@/lib/utils";
 import { Home, Filter, SearchIcon } from "lucide-react";
+import { productApi } from "@/lib/apiService";
+import { getApiUrl, API_ENDPOINTS } from "@/lib/apiConfig";
 
 export default function Products() {
   const [_, params] = useRoute("/products");
@@ -44,9 +46,12 @@ export default function Products() {
   );
   const [sortOption, setSortOption] = useState('price_asc');
 
-  // Fetch products
+  // Fetch products using the productApi service
   const { data: allProducts = [], isLoading } = useQuery({
-    queryKey: ['/api/products/category/products'],
+    queryKey: ['products'],
+    queryFn: async () => {
+      return productApi.getProductsByCategory('products');
+    }
   });
 
   // Filter products based on filters

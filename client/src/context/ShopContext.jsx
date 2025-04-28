@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { orderApi } from "../lib/apiService";
 
 const ShopContext = createContext(undefined);
 
@@ -96,16 +97,19 @@ export function ShopProvider({ children }) {
 
   const checkout = async (userId, shippingAddress, paymentMethod) => {
     try {
-      const response = await apiRequest("POST", "/api/orders", {
+      // Use the order API service to create an order
+      const orderData = {
         userId,
         status: "pending",
         total: cartTotal,
         items: cart,
         shippingAddress,
         paymentMethod
-      });
+      };
       
-      const order = await response.json();
+      // Call the createOrder method from our API service
+      const order = await orderApi.createOrder(orderData);
+      
       clearCart();
       return order.id;
     } catch (error) {
