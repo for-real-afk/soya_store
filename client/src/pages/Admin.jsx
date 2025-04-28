@@ -74,7 +74,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState("dashboard");
   
   // State for dialogs
-  const [activeProductDialog, setActiveProductDialog] = useState({ isOpen: false, product: null, isNew: false });
+  const [activeProductDialog, setActiveProductDialog] = useState({ isOpen: false, product: null, isNew: false, category: '' });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
@@ -145,6 +145,7 @@ export default function Admin() {
         onOpenChange={handleProductDialogChange}
         product={activeProductDialog.product}
         isNew={activeProductDialog.isNew}
+        category={activeProductDialog.category}
       />
       
       {/* Delete Confirmation Dialog */}
@@ -1404,6 +1405,276 @@ export default function Admin() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        {/* Seeds Management Tab - Only visible to admin and seed manager */}
+        <TabsContent value="seeds">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold">Seed Management</h2>
+                <p className="text-muted-foreground text-sm">Manage all seed products in the catalog.</p>
+              </div>
+              <Button onClick={() => setActiveProductDialog({ isOpen: true, product: null, isNew: true, category: 'seeds' })}>
+                <Plus size={16} className="mr-2" />
+                Add New Seed
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-center">
+                  <CardTitle>Seed Inventory</CardTitle>
+                  <div className="flex items-center w-full max-w-sm space-x-2">
+                    <Input 
+                      placeholder="Search seeds..." 
+                      className="h-9"
+                    />
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Search size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="hidden md:table-cell">Description</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead className="hidden md:table-cell">Stock</TableHead>
+                        <TableHead className="hidden md:table-cell">Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products
+                        .filter(product => product.category === 'seeds')
+                        .map(product => (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell className="hidden md:table-cell max-w-xs truncate">{product.description}</TableCell>
+                            <TableCell>{formatCurrency(product.price)}</TableCell>
+                            <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {product.stock > 20 ? (
+                                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">In Stock</Badge>
+                              ) : product.stock > 0 ? (
+                                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">Low Stock</Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Out of Stock</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setActiveProductDialog({ isOpen: true, product, isNew: false })}
+                                >
+                                  <Edit size={16} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    setProductToDelete(product);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        {/* Products Management Tab - Only visible to admin and product manager */}
+        <TabsContent value="products">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold">Product Management</h2>
+                <p className="text-muted-foreground text-sm">Manage all non-seed products in the catalog.</p>
+              </div>
+              <Button onClick={() => setActiveProductDialog({ isOpen: true, product: null, isNew: true, category: 'products' })}>
+                <Plus size={16} className="mr-2" />
+                Add New Product
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-center">
+                  <CardTitle>Product Inventory</CardTitle>
+                  <div className="flex items-center w-full max-w-sm space-x-2">
+                    <Input 
+                      placeholder="Search products..." 
+                      className="h-9"
+                    />
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Search size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="hidden md:table-cell">Description</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead className="hidden md:table-cell">Stock</TableHead>
+                        <TableHead className="hidden md:table-cell">Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products
+                        .filter(product => product.category === 'products')
+                        .map(product => (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell className="hidden md:table-cell max-w-xs truncate">{product.description}</TableCell>
+                            <TableCell>{formatCurrency(product.price)}</TableCell>
+                            <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              {product.stock > 20 ? (
+                                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">In Stock</Badge>
+                              ) : product.stock > 0 ? (
+                                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">Low Stock</Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Out of Stock</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setActiveProductDialog({ isOpen: true, product, isNew: false })}
+                                >
+                                  <Edit size={16} />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    setProductToDelete(product);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        {/* Users Management Tab - Only visible to admin */}
+        <TabsContent value="users">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold">User Management</h2>
+                <p className="text-muted-foreground text-sm">Manage system users and their roles.</p>
+              </div>
+              <Button>
+                <Plus size={16} className="mr-2" />
+                Add New User
+              </Button>
+            </div>
+            
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-center">
+                  <CardTitle>User Accounts</CardTitle>
+                  <div className="flex items-center w-full max-w-sm space-x-2">
+                    <Input 
+                      placeholder="Search users..." 
+                      className="h-9"
+                    />
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Search size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map(user => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.username}</TableCell>
+                          <TableCell>{user.name}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={
+                              user.role === 'admin' 
+                                ? 'bg-red-100 text-red-800 border-red-300'
+                                : user.role === 'seed_manager'
+                                  ? 'bg-green-100 text-green-800 border-green-300'
+                                  : user.role === 'product_manager'
+                                    ? 'bg-blue-100 text-blue-800 border-blue-300'
+                                    : 'bg-gray-100 text-gray-800 border-gray-300'
+                            }>
+                              {user.role === 'admin' ? 'Admin' : 
+                               user.role === 'seed_manager' ? 'Seed Manager' :
+                               user.role === 'product_manager' ? 'Product Manager' : 'Customer'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                              >
+                                <Edit size={16} />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                              >
+                                <Trash2 size={16} />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
