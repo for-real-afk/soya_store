@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, User, ShoppingCart, Menu, X } from "lucide-react";
+import { ChevronDown, User, ShoppingCart, Menu, X, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
-import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NotificationButton from "@/components/NotificationButton";
 
 export default function Header() {
@@ -95,9 +93,46 @@ export default function Header() {
           
           {/* User Actions */}
           <div className="flex items-center space-x-4">
-            {/* Language Selector */}
+            {/* Language Selector - Temporary version until API key is added */}
             <div className="relative hidden md:block">
-              <LanguageSwitcher />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center space-x-1 px-2 text-dark hover:text-primary hover:bg-transparent"
+                  >
+                    <Globe className="h-4 w-4 mr-1" />
+                    <span className="text-sm">EN</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-32 p-0">
+                  <div className="p-1">
+                    <Button
+                      variant="ghost"
+                      className="flex justify-start items-center w-full px-2 py-1.5 text-sm bg-muted font-medium"
+                    >
+                      <span>English</span>
+                      <span className="ml-auto text-primary text-xs">✓</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="flex justify-start items-center w-full px-2 py-1.5 text-sm"
+                      disabled={true}
+                      title="Google Translate API key required"
+                    >
+                      <span>Español</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="flex justify-start items-center w-full px-2 py-1.5 text-sm"
+                      disabled={true}
+                      title="Google Translate API key required"
+                    >
+                      <span>中文</span>
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             
             {/* User Profile */}
@@ -258,7 +293,10 @@ export default function Header() {
               </Link>
               
               <div className="py-2">
-                <LanguageSwitcher />
+                <div className="flex items-center">
+                  <Globe size={18} className="mr-2" /> 
+                  <span>English (EN)</span>
+                </div>
               </div>
             </nav>
           </div>

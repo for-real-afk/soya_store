@@ -1,291 +1,147 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { SUPPORTED_LANGUAGES, translateText, batchTranslate } from '@/lib/googleTranslateService';
 
-// Available languages
-const languages = {
-  en: {
-    code: 'en',
-    name: 'English',
-    translations: {
-      // Navigation
-      home: 'Home',
-      products: 'Products',
-      cart: 'Cart',
-      profile: 'Profile',
-      orders: 'Orders',
-      login: 'Login',
-      register: 'Register',
-      logout: 'Logout',
-      adminPanel: 'Admin Panel',
-      
-      // Product related
-      addToCart: 'Add to Cart',
-      viewDetails: 'View Details',
-      price: 'Price',
-      quantity: 'Quantity',
-      inStock: 'In Stock',
-      outOfStock: 'Out of Stock',
-      category: 'Category',
-      rating: 'Rating',
-      description: 'Description',
-      featured: 'Featured Products',
-      bestSellers: 'Best Sellers',
-      
-      // Cart related
-      yourCart: 'Your Cart',
-      emptyCart: 'Your cart is empty',
-      subtotal: 'Subtotal',
-      checkout: 'Checkout',
-      continueShopping: 'Continue Shopping',
-      remove: 'Remove',
-      
-      // Checkout
-      shipping: 'Shipping',
-      payment: 'Payment',
-      confirmation: 'Confirmation',
-      placeOrder: 'Place Order',
-      
-      // Account
-      welcome: 'Welcome',
-      yourOrders: 'Your Orders',
-      accountSettings: 'Account Settings',
-      
-      // Order status
-      pending: 'Pending',
-      processing: 'Processing',
-      shipped: 'Shipped',
-      delivered: 'Delivered',
-      cancelled: 'Cancelled',
-      
-      // Chatbot
-      chatWithUs: 'Chat with Us',
-      howCanIHelp: 'How can I help you today?',
-      typeMessage: 'Type your message...',
-      send: 'Send',
-      
-      // Admin
-      inventory: 'Inventory',
-      addProduct: 'Add Product',
-      editProduct: 'Edit Product',
-      uploadImage: 'Upload Image',
-      orderManagement: 'Order Management',
-      
-      // Misc
-      search: 'Search',
-      recommendations: 'Recommendations for you',
-      contactUs: 'Contact Us',
-      aboutUs: 'About Us',
-      termsOfService: 'Terms of Service',
-      privacyPolicy: 'Privacy Policy',
-    }
-  },
-  es: {
-    code: 'es',
-    name: 'Español',
-    translations: {
-      // Navigation
-      home: 'Inicio',
-      products: 'Productos',
-      cart: 'Carrito',
-      profile: 'Perfil',
-      orders: 'Pedidos',
-      login: 'Iniciar Sesión',
-      register: 'Registrarse',
-      logout: 'Cerrar Sesión',
-      adminPanel: 'Panel de Administrador',
-      
-      // Product related
-      addToCart: 'Añadir al Carrito',
-      viewDetails: 'Ver Detalles',
-      price: 'Precio',
-      quantity: 'Cantidad',
-      inStock: 'En Stock',
-      outOfStock: 'Agotado',
-      category: 'Categoría',
-      rating: 'Valoración',
-      description: 'Descripción',
-      featured: 'Productos Destacados',
-      bestSellers: 'Más Vendidos',
-      
-      // Cart related
-      yourCart: 'Tu Carrito',
-      emptyCart: 'Tu carrito está vacío',
-      subtotal: 'Subtotal',
-      checkout: 'Finalizar Compra',
-      continueShopping: 'Seguir Comprando',
-      remove: 'Eliminar',
-      
-      // Checkout
-      shipping: 'Envío',
-      payment: 'Pago',
-      confirmation: 'Confirmación',
-      placeOrder: 'Realizar Pedido',
-      
-      // Account
-      welcome: 'Bienvenido',
-      yourOrders: 'Tus Pedidos',
-      accountSettings: 'Configuración de la Cuenta',
-      
-      // Order status
-      pending: 'Pendiente',
-      processing: 'Procesando',
-      shipped: 'Enviado',
-      delivered: 'Entregado',
-      cancelled: 'Cancelado',
-      
-      // Chatbot
-      chatWithUs: 'Chatea con Nosotros',
-      howCanIHelp: '¿Cómo puedo ayudarte hoy?',
-      typeMessage: 'Escribe tu mensaje...',
-      send: 'Enviar',
-      
-      // Admin
-      inventory: 'Inventario',
-      addProduct: 'Añadir Producto',
-      editProduct: 'Editar Producto',
-      uploadImage: 'Subir Imagen',
-      orderManagement: 'Gestión de Pedidos',
-      
-      // Misc
-      search: 'Buscar',
-      recommendations: 'Recomendaciones para ti',
-      contactUs: 'Contáctanos',
-      aboutUs: 'Sobre Nosotros',
-      termsOfService: 'Términos de Servicio',
-      privacyPolicy: 'Política de Privacidad',
-    }
-  },
-  fr: {
-    code: 'fr',
-    name: 'Français',
-    translations: {
-      // Navigation
-      home: 'Accueil',
-      products: 'Produits',
-      cart: 'Panier',
-      profile: 'Profil',
-      orders: 'Commandes',
-      login: 'Connexion',
-      register: 'S\'inscrire',
-      logout: 'Déconnexion',
-      adminPanel: 'Panneau d\'Administration',
-      
-      // Product related
-      addToCart: 'Ajouter au Panier',
-      viewDetails: 'Voir Détails',
-      price: 'Prix',
-      quantity: 'Quantité',
-      inStock: 'En Stock',
-      outOfStock: 'Épuisé',
-      category: 'Catégorie',
-      rating: 'Évaluation',
-      description: 'Description',
-      featured: 'Produits Vedettes',
-      bestSellers: 'Meilleures Ventes',
-      
-      // Cart related
-      yourCart: 'Votre Panier',
-      emptyCart: 'Votre panier est vide',
-      subtotal: 'Sous-total',
-      checkout: 'Commander',
-      continueShopping: 'Continuer vos Achats',
-      remove: 'Supprimer',
-      
-      // Checkout
-      shipping: 'Livraison',
-      payment: 'Paiement',
-      confirmation: 'Confirmation',
-      placeOrder: 'Passer Commande',
-      
-      // Account
-      welcome: 'Bienvenue',
-      yourOrders: 'Vos Commandes',
-      accountSettings: 'Paramètres du Compte',
-      
-      // Order status
-      pending: 'En Attente',
-      processing: 'En Cours',
-      shipped: 'Expédié',
-      delivered: 'Livré',
-      cancelled: 'Annulé',
-      
-      // Chatbot
-      chatWithUs: 'Chattez avec Nous',
-      howCanIHelp: 'Comment puis-je vous aider aujourd\'hui?',
-      typeMessage: 'Tapez votre message...',
-      send: 'Envoyer',
-      
-      // Admin
-      inventory: 'Inventaire',
-      addProduct: 'Ajouter Produit',
-      editProduct: 'Modifier Produit',
-      uploadImage: 'Télécharger Image',
-      orderManagement: 'Gestion des Commandes',
-      
-      // Misc
-      search: 'Rechercher',
-      recommendations: 'Recommandations pour vous',
-      contactUs: 'Contactez-nous',
-      aboutUs: 'À Propos',
-      termsOfService: 'Conditions d\'Utilisation',
-      privacyPolicy: 'Politique de Confidentialité',
-    }
-  }
-};
+// Create the language context
+const LanguageContext = createContext();
 
-// Create the context
-export const LanguageContext = createContext();
+// Cached translations to avoid repeated API calls
+const translationCache = {};
 
-export const LanguageProvider = ({ children }) => {
-  // Get language from localStorage or use English as default
-  const [currentLanguage, setCurrentLanguage] = useState(() => {
-    const savedLanguage = localStorage.getItem('language');
-    return savedLanguage && languages[savedLanguage] ? savedLanguage : 'en';
+export function LanguageProvider({ children }) {
+  // Current language state - default to English
+  const [language, setLanguage] = useState(() => {
+    // Try to get saved language from localStorage
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    return savedLanguage && SUPPORTED_LANGUAGES.some(lang => lang.code === savedLanguage)
+      ? savedLanguage
+      : 'en';
   });
 
-  // Save language to localStorage when it changes
+  // Loading state for translations
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // Save language preference to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem('language', currentLanguage);
-  }, [currentLanguage]);
+    localStorage.setItem('preferredLanguage', language);
+  }, [language]);
 
-  // Change the language
-  const changeLanguage = (languageCode) => {
-    if (languages[languageCode]) {
-      setCurrentLanguage(languageCode);
+  // Function to change the current language
+  const changeLanguage = useCallback((langCode) => {
+    if (SUPPORTED_LANGUAGES.some(lang => lang.code === langCode)) {
+      setLanguage(langCode);
+    } else {
+      console.warn(`Language code "${langCode}" is not supported.`);
     }
-  };
+  }, []);
 
-  // Get a translation by key
-  const t = (key) => {
-    return languages[currentLanguage]?.translations[key] || languages.en.translations[key] || key;
-  };
+  // Function to translate text using Google Translate
+  const t = useCallback(async (key, defaultText) => {
+    // If language is English or no text, return as is
+    if (language === 'en' || !defaultText) {
+      return defaultText || key;
+    }
 
-  // Get available languages
-  const getAvailableLanguages = () => {
-    return Object.values(languages).map(lang => ({
-      code: lang.code,
-      name: lang.name
-    }));
-  };
+    const text = defaultText || key;
+    const cacheKey = `${language}:${text}`;
+    
+    // Check if we already have this translation cached
+    if (translationCache[cacheKey]) {
+      return translationCache[cacheKey];
+    }
+    
+    try {
+      setIsTranslating(true);
+      const translated = await translateText(text, language);
+      
+      // Cache the result
+      translationCache[cacheKey] = translated;
+      
+      return translated;
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text; // Return original text if translation fails
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [language]);
 
-  const contextValue = {
-    currentLanguage,
+  // Batch translate multiple texts at once
+  const batchT = useCallback(async (texts) => {
+    if (language === 'en' || !texts || !texts.length) {
+      return texts;
+    }
+
+    // Check which texts need translation (not in cache)
+    const textsToTranslate = [];
+    const cachedResults = [];
+    const indices = [];
+
+    texts.forEach((text, i) => {
+      const cacheKey = `${language}:${text}`;
+      if (translationCache[cacheKey]) {
+        cachedResults[i] = translationCache[cacheKey];
+      } else {
+        textsToTranslate.push(text);
+        indices.push(i);
+      }
+    });
+
+    // If all texts are cached, return the cached results
+    if (textsToTranslate.length === 0) {
+      return texts.map((_, i) => cachedResults[i] || texts[i]);
+    }
+
+    try {
+      setIsTranslating(true);
+      const translatedTexts = await batchTranslate(textsToTranslate, language);
+      
+      // Cache the results
+      translatedTexts.forEach((translated, i) => {
+        const originalText = textsToTranslate[i];
+        translationCache[`${language}:${originalText}`] = translated;
+        
+        const originalIndex = indices[i];
+        cachedResults[originalIndex] = translated;
+      });
+      
+      // Combine cached and new translations
+      return texts.map((text, i) => cachedResults[i] || text);
+    } catch (error) {
+      console.error('Batch translation error:', error);
+      return texts; // Return original texts if translation fails
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [language]);
+
+  // Get the current language display name
+  const currentLanguageName = SUPPORTED_LANGUAGES.find(lang => lang.code === language)?.name || 'English';
+
+  // Context value
+  const value = {
+    language,
     changeLanguage,
+    supportedLanguages: SUPPORTED_LANGUAGES,
+    isTranslating,
     t,
-    getAvailableLanguages
+    batchT,
+    currentLanguageName
   };
 
   return (
-    <LanguageContext.Provider value={contextValue}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
-};
+}
 
 // Custom hook to use the language context
-export const useLanguage = () => {
+export function useLanguage() {
   const context = useContext(LanguageContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;
-};
+}
+
+export default LanguageContext;
