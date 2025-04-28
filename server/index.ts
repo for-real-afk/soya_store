@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupDjangoProxy } from "./django-proxy";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
@@ -77,6 +78,10 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // Setup Django proxy
+  const startDjango = setupDjangoProxy(app);
+  startDjango(); // Start the Django server
 
   // Add CORS protection middleware
   app.use((req: Request, res: Response, next: NextFunction) => {
