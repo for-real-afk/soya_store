@@ -48,6 +48,7 @@ import {
   Clock,
   Truck,
   FileCheck,
+  ChevronRight
 } from "lucide-react";
 
 // Register Chart.js components
@@ -152,7 +153,38 @@ export default function Admin() {
       />
       
       <Tabs defaultValue="dashboard">
-        <TabsList className="grid grid-cols-6 mb-8">
+        {/* Custom tabs display for mobile - scrollable horizontal tabs */}
+        <div className="md:hidden overflow-x-auto pb-2 mb-4">
+          <TabsList className="flex w-auto min-w-max space-x-1">
+            <TabsTrigger value="dashboard" className="flex-shrink-0">
+              <BarChart3 size={16} />
+              <span className="ml-1">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="flex-shrink-0">
+              <ShoppingBag size={16} />
+              <span className="ml-1">Orders</span>
+            </TabsTrigger>
+            <TabsTrigger value="recent_orders" className="flex-shrink-0">
+              <Clock size={16} />
+              <span className="ml-1">Recent</span>
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="flex-shrink-0">
+              <Package size={16} />
+              <span className="ml-1">Inventory</span>
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="flex-shrink-0">
+              <Users size={16} />
+              <span className="ml-1">Customers</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex-shrink-0">
+              <Sliders size={16} />
+              <span className="ml-1">Settings</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+        
+        {/* Desktop tabs - Grid based layout */}
+        <TabsList className="hidden md:grid grid-cols-6 mb-8">
           <TabsTrigger value="dashboard">
             <BarChart3 size={16} className="mr-2" /> Dashboard
           </TabsTrigger>
@@ -175,59 +207,60 @@ export default function Admin() {
         
         {/* Dashboard Tab */}
         <TabsContent value="dashboard">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
+          {/* Mobile optimized stat cards in a 2-column grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-1 p-3 md:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium">Total Sales</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(orders.reduce((total, order) => total + order.total, 0))}</div>
-                <p className="text-xs text-muted-foreground">+12.5% from last month</p>
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="text-lg md:text-2xl font-bold">{formatCurrency(orders.reduce((total, order) => total + order.total, 0))}</div>
+                <p className="text-[10px] md:text-xs text-muted-foreground">+12.5% from last month</p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Orders</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-1 p-3 md:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium">Orders</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{orders.length}</div>
-                <p className="text-xs text-muted-foreground">+8.1% from last month</p>
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="text-lg md:text-2xl font-bold">{orders.length}</div>
+                <p className="text-[10px] md:text-xs text-muted-foreground">+8.1% from last month</p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Products</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-1 p-3 md:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium">Products</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{products.length}</div>
-                <p className="text-xs text-muted-foreground">+2 new this month</p>
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="text-lg md:text-2xl font-bold">{products.length}</div>
+                <p className="text-[10px] md:text-xs text-muted-foreground">+2 new this month</p>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-1 p-3 md:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium">Inventory Value</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="text-lg md:text-2xl font-bold">
                   {formatCurrency(products.reduce((total, product) => total + (product.price * product.stock), 0))}
                 </div>
-                <p className="text-xs text-muted-foreground">+5.2% from last month</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground">+5.2% from last month</p>
               </CardContent>
             </Card>
           </div>
           
-          {/* Sales Analytics Chart */}
+          {/* Sales Analytics Chart - Mobile optimized */}
           <div className="grid grid-cols-1 gap-6 mb-8">
             <Card>
-              <CardHeader>
-                <CardTitle>Sales Analytics</CardTitle>
-                <CardDescription>Monthly sales performance</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base md:text-lg">Sales Analytics</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Monthly sales performance</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
+              <CardContent className="p-2 sm:p-6 pt-0">
+                <div className="h-[250px] sm:h-[300px]">
                   <Line 
                     options={{
                       responsive: true,
@@ -235,11 +268,23 @@ export default function Admin() {
                       plugins: {
                         legend: {
                           position: 'top',
+                          labels: {
+                            boxWidth: 12,
+                            font: {
+                              size: window.innerWidth < 768 ? 10 : 12
+                            }
+                          }
                         },
                         title: {
                           display: false,
                         },
                         tooltip: {
+                          bodyFont: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                          },
+                          titleFont: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                          },
                           callbacks: {
                             label: function(context) {
                               let label = context.dataset.label || '';
@@ -258,15 +303,29 @@ export default function Admin() {
                         y: {
                           beginAtZero: true,
                           ticks: {
+                            font: {
+                              size: window.innerWidth < 768 ? 8 : 11
+                            },
                             callback: function(value) {
                               return formatCurrency(value);
                             }
+                          }
+                        },
+                        x: {
+                          ticks: {
+                            font: {
+                              size: window.innerWidth < 768 ? 8 : 11
+                            },
+                            maxRotation: window.innerWidth < 768 ? 45 : 0
                           }
                         }
                       }
                     }}
                     data={{
-                      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                      // Use abbreviated month names on mobile
+                      labels: window.innerWidth < 768 
+                        ? ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+                        : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                       datasets: [
                         {
                           label: 'Monthly Sales',
@@ -284,25 +343,32 @@ export default function Admin() {
             </Card>
           </div>
 
-          {/* Product Category & Inventory Charts */}
+          {/* Product Category & Inventory Charts - Mobile Optimized */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card>
-              <CardHeader>
-                <CardTitle>Product Category Distribution</CardTitle>
-                <CardDescription>Breakdown by category</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base md:text-lg">Product Categories</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Breakdown by category</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-[250px]">
+              <CardContent className="p-2 sm:p-6 pt-0">
+                <div className="h-[200px] sm:h-[250px] flex items-center justify-center">
                   <Doughnut
                     options={{
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
                         legend: {
-                          position: 'bottom',
+                          position: window.innerWidth < 640 ? 'right' : 'bottom',
+                          labels: {
+                            boxWidth: window.innerWidth < 640 ? 8 : 12,
+                            font: {
+                              size: window.innerWidth < 640 ? 10 : 12
+                            },
+                            padding: window.innerWidth < 640 ? 8 : 10
+                          }
                         }
                       },
-                      cutout: '65%'
+                      cutout: '60%'
                     }}
                     data={{
                       labels: ['Seeds', 'Products'],
@@ -327,12 +393,12 @@ export default function Admin() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Inventory by Stock Level</CardTitle>
-                <CardDescription>Product inventory breakdown</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base md:text-lg">Inventory Status</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Product stock levels</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="h-[250px]">
+              <CardContent className="p-2 sm:p-6 pt-0">
+                <div className="h-[200px] sm:h-[250px]">
                   <Bar
                     options={{
                       responsive: true,
@@ -340,20 +406,46 @@ export default function Admin() {
                       plugins: {
                         legend: {
                           display: false
+                        },
+                        tooltip: {
+                          bodyFont: {
+                            size: window.innerWidth < 640 ? 10 : 12
+                          },
+                          titleFont: {
+                            size: window.innerWidth < 640 ? 10 : 12
+                          }
                         }
                       },
                       scales: {
                         y: {
                           beginAtZero: true,
                           title: {
-                            display: true,
-                            text: 'Number of Products'
+                            display: window.innerWidth >= 640,
+                            text: 'Number of Products',
+                            font: {
+                              size: 10
+                            }
+                          },
+                          ticks: {
+                            font: {
+                              size: window.innerWidth < 640 ? 8 : 10
+                            }
+                          }
+                        },
+                        x: {
+                          ticks: {
+                            font: {
+                              size: window.innerWidth < 640 ? 8 : 10
+                            }
                           }
                         }
                       }
                     }}
                     data={{
-                      labels: ['Low Stock (<10)', 'Medium (10-30)', 'Good (30-70)', 'High (70+)'],
+                      // Use shorter labels on mobile
+                      labels: window.innerWidth < 640 
+                        ? ['Low', 'Medium', 'Good', 'High']
+                        : ['Low Stock (<10)', 'Medium (10-30)', 'Good (30-70)', 'High (70+)'],
                       datasets: [
                         {
                           label: 'Products',
@@ -378,69 +470,86 @@ export default function Admin() {
             </Card>
           </div>
 
-          {/* Recent Orders & Low Stock Products */}
+          {/* Recent Orders & Low Stock Products - Mobile Optimized */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Recent Orders</CardTitle>
-                <CardDescription>Latest 5 orders</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base md:text-lg">Recent Orders</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Latest 5 orders</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6 pt-0">
                 {isLoadingOrders ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="animate-pulse flex justify-between items-center py-2">
-                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/3"></div>
+                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/4"></div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {orders.slice(0, 5).map(order => (
-                      <div key={order.id} className="flex justify-between items-center py-2 border-b last:border-0">
-                        <div>
-                          <div className="font-semibold">Order #{order.id}</div>
-                          <div className="text-sm text-gray-500">
+                      <div key={order.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b last:border-0">
+                        <div className="flex justify-between items-center sm:block mb-1 sm:mb-0">
+                          <div className="text-xs sm:text-sm font-semibold">Order #{order.id}</div>
+                          <div className="text-xs text-gray-500 sm:mt-0.5">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="flex items-center">
-                          <OrderStatus status={order.status} />
-                          <span className="ml-2 font-semibold">{formatCurrency(order.total)}</span>
+                        <div className="flex items-center justify-between sm:justify-end mt-1 sm:mt-0">
+                          <div className="sm:order-2 ml-0 sm:ml-2">
+                            <span className="text-xs sm:text-sm font-semibold">{formatCurrency(order.total)}</span>
+                          </div>
+                          <div className="sm:order-1">
+                            <OrderStatus status={order.status} />
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
+                <div className="mt-4 text-right">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-xs sm:text-sm text-primary font-medium" 
+                    onClick={() => setActiveTab('orders')}
+                  >
+                    View all orders <ChevronRight size={14} className="ml-1" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader>
-                <CardTitle>Inventory Status</CardTitle>
-                <CardDescription>Products with low stock</CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-sm sm:text-base md:text-lg">Inventory Status</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Products with low stock</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6 pt-0">
                 {isLoadingProducts ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className="animate-pulse flex justify-between items-center py-2">
-                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/6"></div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {products
                       .filter(product => product.stock < 20)
                       .slice(0, 5)
                       .map(product => (
-                        <div key={product.id} className="flex justify-between items-center py-2 border-b last:border-0">
-                          <div className="font-semibold">{product.name}</div>
+                        <div key={product.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                          <div className="text-xs sm:text-sm font-medium line-clamp-1 max-w-[70%]">{product.name}</div>
                           <div>
-                            <Badge variant={product.stock < 10 ? "destructive" : "outline"}>
+                            <Badge 
+                              variant={product.stock < 10 ? "destructive" : "outline"} 
+                              className="text-[10px] sm:text-xs px-1.5 sm:px-2"
+                            >
                               Stock: {product.stock}
                             </Badge>
                           </div>
@@ -448,6 +557,16 @@ export default function Admin() {
                       ))}
                   </div>
                 )}
+                <div className="mt-4 text-right">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-xs sm:text-sm text-primary font-medium" 
+                    onClick={() => setActiveTab('inventory')}
+                  >
+                    View inventory <ChevronRight size={14} className="ml-1" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
