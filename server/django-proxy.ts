@@ -9,7 +9,7 @@ export function setupDjangoProxy(app: Express) {
     target: 'http://localhost:8000',
     changeOrigin: true,
     pathRewrite: {
-      '^/api/django': '/api',  // Rewrite path from /api/django to /api
+      '^/api/django': '',  // Rewrite path from /api/django to root
     },
     onProxyReq: (proxyReq, req, res) => {
       // Log the proxied request
