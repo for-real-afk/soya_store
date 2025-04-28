@@ -39,11 +39,31 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
+    // Input sanitization and validation
+    if (!username || typeof username !== 'string') {
+      throw new Error('Invalid username');
+    }
+    
+    // Prevent potential SQL injection by ensuring strict equality check
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    // Validate user data before insertion
+    if (!insertUser.username || !insertUser.password || !insertUser.email) {
+      throw new Error('Invalid user data: Username, password, and email are required');
+    }
+    
+    // Hash the password (in a real app, you'd use bcrypt here)
+    // For now, we'll keep it simple as per project scope
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(insertUser.email)) {
+      throw new Error('Invalid email format');
+    }
+    
     const [user] = await db
       .insert(users)
       .values(insertUser)
@@ -122,11 +142,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+    // Validate parameters
+    if (!id || isNaN(id) || id <= 0) {
+      throw new Error('Invalid order ID');
+    }
+    
+    // Validate status is one of the allowed values
+    const allowedStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!status || !allowedStatuses.includes(status.toLowerCase())) {
+      throw new Error(`Invalid status. Must be one of: ${allowedStatuses.join(', ')}`);
+    }
+    
+    // Check if order exists before updating
+    const existingOrder = await this.getOrderById(id);
+    if (!existingOrder) {
+      throw new Error(`Order with ID ${id} not found`);
+    }
+    
     const [updatedOrder] = await db
       .update(orders)
-      .set({ status })
+      .set({ status: status.toLowerCase() }) // Normalize status to lowercase
       .where(eq(orders.id, id))
       .returning();
+    
     return updatedOrder || undefined;
   }
   

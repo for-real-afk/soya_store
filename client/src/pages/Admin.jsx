@@ -13,11 +13,22 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatCurrency } from "@/lib/utils";
 import OrderStatus from "@/components/OrderStatus";
-// Import recharts components
+// Import Chart.js components
 import {
-  LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
-} from 'recharts';
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend as ChartLegend,
+  Filler
+} from 'chart.js';
+import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
+
 import {
   Package,
   ShoppingBag,
@@ -35,6 +46,20 @@ import {
   Truck,
   FileCheck,
 } from "lucide-react";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Title,
+  ChartTooltip,
+  ChartLegend,
+  Filler
+);
 
 export default function Admin() {
   const { toast } = useToast();
@@ -154,7 +179,7 @@ export default function Admin() {
             </Card>
           </div>
           
-          {/* Basic Sales Chart */}
+          {/* Sales Analytics Chart */}
           <div className="grid grid-cols-1 gap-6 mb-8">
             <Card>
               <CardHeader>
@@ -162,18 +187,64 @@ export default function Admin() {
                 <CardDescription>Monthly sales performance</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px] bg-gray-100 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <BarChart3 size={48} className="mx-auto mb-2 text-gray-400" />
-                    <p className="text-xl font-medium">Sales Analytics Chart</p>
-                    <p className="text-sm text-gray-500">Data visualization showing monthly sales trends</p>
-                  </div>
+                <div className="h-[300px]">
+                  <Line 
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'top',
+                        },
+                        title: {
+                          display: false,
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function(context) {
+                              let label = context.dataset.label || '';
+                              if (label) {
+                                label += ': ';
+                              }
+                              if (context.parsed.y !== null) {
+                                label += formatCurrency(context.parsed.y);
+                              }
+                              return label;
+                            }
+                          }
+                        }
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          ticks: {
+                            callback: function(value) {
+                              return formatCurrency(value);
+                            }
+                          }
+                        }
+                      }
+                    }}
+                    data={{
+                      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                      datasets: [
+                        {
+                          label: 'Monthly Sales',
+                          data: [4000, 3000, 5000, 2780, 1890, 2390, 3490, 2000, 2500, 6000, 7000, 5500],
+                          borderColor: '#10b981',
+                          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                          fill: true,
+                          tension: 0.4
+                        }
+                      ],
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Simplified Charts - Static Version */}
+          {/* Product Category & Inventory Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card>
               <CardHeader>
@@ -181,20 +252,36 @@ export default function Admin() {
                 <CardDescription>Breakdown by category</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px] bg-gray-100 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <div className="flex items-center justify-center gap-4 mb-4">
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                        <span>Seeds</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-                        <span>Products</span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-500">Visual representation of product categories</p>
-                  </div>
+                <div className="h-[250px]">
+                  <Doughnut
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'bottom',
+                        }
+                      },
+                      cutout: '65%'
+                    }}
+                    data={{
+                      labels: ['Seeds', 'Products'],
+                      datasets: [
+                        {
+                          data: [
+                            products.filter(p => p.category === 'seeds').length,
+                            products.filter(p => p.category === 'products').length
+                          ],
+                          backgroundColor: [
+                            '#10b981', // green
+                            '#6366f1'  // blue
+                          ],
+                          borderColor: 'white',
+                          borderWidth: 2,
+                        },
+                      ],
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -205,28 +292,47 @@ export default function Admin() {
                 <CardDescription>Product inventory breakdown</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[250px] bg-gray-100 flex items-center justify-center">
-                  <div className="text-center p-4">
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center">
-                        <div className="w-full bg-red-500 h-4" style={{ width: '20%' }}></div>
-                        <span className="ml-2">Low Stock</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-full bg-yellow-500 h-4" style={{ width: '30%' }}></div>
-                        <span className="ml-2">Medium</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-full bg-green-500 h-4" style={{ width: '25%' }}></div>
-                        <span className="ml-2">Good</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-full bg-blue-500 h-4" style={{ width: '25%' }}></div>
-                        <span className="ml-2">High</span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-500">Inventory breakdown by stock level</p>
-                  </div>
+                <div className="h-[250px]">
+                  <Bar
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false
+                        }
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          title: {
+                            display: true,
+                            text: 'Number of Products'
+                          }
+                        }
+                      }
+                    }}
+                    data={{
+                      labels: ['Low Stock (<10)', 'Medium (10-30)', 'Good (30-70)', 'High (70+)'],
+                      datasets: [
+                        {
+                          label: 'Products',
+                          data: [
+                            products.filter(p => p.stock < 10).length,
+                            products.filter(p => p.stock >= 10 && p.stock < 30).length,
+                            products.filter(p => p.stock >= 30 && p.stock < 70).length,
+                            products.filter(p => p.stock >= 70).length
+                          ],
+                          backgroundColor: [
+                            '#ef4444', // red
+                            '#f59e0b', // amber
+                            '#10b981', // green
+                            '#3b82f6'  // blue
+                          ]
+                        }
+                      ],
+                    }}
+                  />
                 </div>
               </CardContent>
             </Card>
