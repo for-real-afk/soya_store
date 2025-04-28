@@ -2,7 +2,7 @@
 // This file provides a central place to configure API endpoints
 
 // Set this to true to use the Django backend, false to use the original Express backend
-export const USE_DJANGO_API = false;
+export const USE_DJANGO_API = true;
 
 // Base API paths
 export const EXPRESS_API_BASE = '/api';
