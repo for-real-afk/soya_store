@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ ChartJS.register(
 
 export default function Admin() {
   const { toast } = useToast();
+  const { user, isAdmin, canManageSeeds, canManageProducts } = useAuth();
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("dashboard");
   
@@ -162,60 +164,122 @@ export default function Admin() {
         {/* Custom tabs display for mobile - scrollable horizontal tabs */}
         <div className="md:hidden overflow-x-auto pb-2 mb-4">
           <TabsList className="flex w-auto min-w-max space-x-1">
+            {/* Dashboard tab for all admin roles */}
             <TabsTrigger value="dashboard" className="flex-shrink-0">
               <BarChart3 size={16} />
               <span className="ml-1">Dashboard</span>
             </TabsTrigger>
+            
+            {/* Orders tabs for all admin roles */}
             <TabsTrigger value="orders" className="flex-shrink-0">
               <ShoppingBag size={16} />
               <span className="ml-1">Orders</span>
             </TabsTrigger>
+            
             <TabsTrigger value="recent_orders" className="flex-shrink-0">
               <Clock size={16} />
               <span className="ml-1">Recent</span>
             </TabsTrigger>
+            
+            {/* Inventory tab - visible to admins and both managers */}
             <TabsTrigger value="inventory" className="flex-shrink-0">
               <Package size={16} />
               <span className="ml-1">Inventory</span>
             </TabsTrigger>
+            
+            {/* Customers tab - visible to all admin roles */}
             <TabsTrigger value="customers" className="flex-shrink-0">
               <Users size={16} />
               <span className="ml-1">Customers</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex-shrink-0">
-              <Sliders size={16} />
-              <span className="ml-1">Settings</span>
-            </TabsTrigger>
-            <TabsTrigger value="users" className="flex-shrink-0">
-              <UsersRound size={16} />
-              <span className="ml-1">Users</span>
-            </TabsTrigger>
+            
+            {/* Settings tab - only visible to admin */}
+            {isAdmin && (
+              <TabsTrigger value="settings" className="flex-shrink-0">
+                <Sliders size={16} />
+                <span className="ml-1">Settings</span>
+              </TabsTrigger>
+            )}
+            
+            {/* Users tab - only visible to admin */}
+            {isAdmin && (
+              <TabsTrigger value="users" className="flex-shrink-0">
+                <UsersRound size={16} />
+                <span className="ml-1">Users</span>
+              </TabsTrigger>
+            )}
+            
+            {/* Seeds tab - visible to admin and seed manager */}
+            {canManageSeeds && (
+              <TabsTrigger value="seeds" className="flex-shrink-0">
+                <Package size={16} />
+                <span className="ml-1">Seeds</span>
+              </TabsTrigger>
+            )}
+            
+            {/* Products tab - visible to admin and product manager */}
+            {canManageProducts && (
+              <TabsTrigger value="products" className="flex-shrink-0">
+                <Package size={16} />
+                <span className="ml-1">Products</span>
+              </TabsTrigger>
+            )}
           </TabsList>
         </div>
         
         {/* Desktop tabs - Grid based layout */}
-        <TabsList className="hidden md:grid grid-cols-7 mb-8">
+        <TabsList className="hidden md:grid grid-cols-9 gap-1 mb-8">
+          {/* Dashboard tab for all admin roles */}
           <TabsTrigger value="dashboard">
             <BarChart3 size={16} className="mr-2" /> Dashboard
           </TabsTrigger>
+          
+          {/* Orders tabs for all admin roles */}
           <TabsTrigger value="orders">
             <ShoppingBag size={16} className="mr-2" /> Orders
           </TabsTrigger>
+          
           <TabsTrigger value="recent_orders">
             <Clock size={16} className="mr-2" /> Recent Orders
           </TabsTrigger>
+          
+          {/* Inventory tab - visible to admins and both managers */}
           <TabsTrigger value="inventory">
             <Package size={16} className="mr-2" /> Inventory
           </TabsTrigger>
+          
+          {/* Customers tab - visible to all admin roles */}
           <TabsTrigger value="customers">
             <Users size={16} className="mr-2" /> Customers
           </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Sliders size={16} className="mr-2" /> Settings
-          </TabsTrigger>
-          <TabsTrigger value="users">
-            <UsersRound size={16} className="mr-2" /> Users
-          </TabsTrigger>
+          
+          {/* Settings tab - only visible to admin */}
+          {isAdmin && (
+            <TabsTrigger value="settings">
+              <Sliders size={16} className="mr-2" /> Settings
+            </TabsTrigger>
+          )}
+          
+          {/* Users tab - only visible to admin */}
+          {isAdmin && (
+            <TabsTrigger value="users">
+              <UsersRound size={16} className="mr-2" /> Users
+            </TabsTrigger>
+          )}
+          
+          {/* Seeds tab - visible to admin and seed manager */}
+          {canManageSeeds && (
+            <TabsTrigger value="seeds">
+              <Package size={16} className="mr-2" /> Seeds
+            </TabsTrigger>
+          )}
+          
+          {/* Products tab - visible to admin and product manager */}
+          {canManageProducts && (
+            <TabsTrigger value="products">
+              <Package size={16} className="mr-2" /> Products
+            </TabsTrigger>
+          )}
         </TabsList>
         
         {/* Dashboard Tab */}
