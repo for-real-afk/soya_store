@@ -26,8 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import { addressSchema } from "@shared/schema";
 import { formatCurrency, sanitizeInput } from "@/lib/utils";
 import { Home, CreditCard, DollarSign, FileText, ChevronRight, Check } from "lucide-react";
-import PaymentUpload from "@/components/PaymentUpload";
-import TwoFactorAuth from "@/components/TwoFactorAuth";
+import PaymentUpload from "../components/PaymentUpload";
+import TwoFactorAuth from "../components/TwoFactorAuth";
 
 const checkoutFormSchema = addressSchema.extend({
   saveAddress: z.boolean().default(false),

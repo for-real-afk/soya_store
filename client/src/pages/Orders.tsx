@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Order } from "@shared/schema";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Eye, Home, Package, ShoppingBag } from "lucide-react";
-import OrderStatus from "@/components/OrderStatus";
+import OrderStatus from "../components/OrderStatus";
 
 export default function Orders() {
   const { user } = useAuth();

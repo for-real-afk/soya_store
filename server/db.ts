@@ -11,5 +11,18 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Configure pool with better error handling and connection management
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  connectionTimeoutMillis: 5000,  // Connection timeout
+  max: 5,                        // Maximum number of clients the pool should contain
+  idleTimeoutMillis: 30000       // How long a client is allowed to remain idle before being closed
+});
+
+// Handle pool errors to prevent application crashes
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle database client', err);
+  // Don't crash the server on connection errors
+});
+
 export const db = drizzle({ client: pool, schema });
