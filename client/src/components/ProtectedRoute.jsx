@@ -1,15 +1,10 @@
-import { ReactNode } from "react";
+import React from "react";
 import { Redirect } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-  adminOnly?: boolean;
-}
-
-export default function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, adminOnly = false }) {
   const { isAuthenticated, isAdmin } = useAuth();
   
   // If user is not authenticated, redirect to login

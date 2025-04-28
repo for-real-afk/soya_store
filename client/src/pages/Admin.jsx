@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch"; // Import the Switch component
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatCurrency } from "@/lib/utils";
-import { Product, Order, User } from "@shared/schema";
 import OrderStatus from "@/components/OrderStatus";
 import {
   Package,
@@ -33,21 +33,21 @@ import {
 
 export default function Admin() {
   const { toast } = useToast();
-  const [orderStatusFilter, setOrderStatusFilter] = useState<string>("all");
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   
   // Fetch products
-  const { data: products = [], isLoading: isLoadingProducts } = useQuery<Product[]>({
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['/api/products'],
   });
   
   // Fetch orders
-  const { data: orders = [], isLoading: isLoadingOrders } = useQuery<Order[]>({
+  const { data: orders = [], isLoading: isLoadingOrders } = useQuery({
     queryKey: ['/api/orders'],
   });
   
   // Mutation for updating order status
   const updateOrderStatus = useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: number, status: string }) => {
+    mutationFn: async ({ orderId, status }) => {
       const response = await apiRequest("PUT", `/api/orders/${orderId}/status`, { status });
       return response.json();
     },
@@ -68,7 +68,7 @@ export default function Admin() {
   });
   
   // Handle status change
-  const handleStatusChange = (orderId: number, status: string) => {
+  const handleStatusChange = (orderId, status) => {
     updateOrderStatus.mutate({ orderId, status });
   };
   
@@ -386,25 +386,10 @@ export default function Admin() {
                       products.map(product => (
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">#{product.id}</TableCell>
+                          <TableCell>{product.name}</TableCell>
                           <TableCell>
-                            <div className="flex items-center">
-                              <img 
-                                src={product.imageUrl} 
-                                alt={product.name} 
-                                className="w-10 h-10 object-cover rounded mr-3" 
-                              />
-                              <div>
-                                <div className="font-semibold">{product.name}</div>
-                                <div className="text-xs text-gray-500 truncate max-w-xs">
-                                  {product.description.substring(0, 30)}...
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">
+                            <Badge variant="outline" className="capitalize">
                               {product.category}
-                              {product.subcategory && `/${product.subcategory}`}
                             </Badge>
                           </TableCell>
                           <TableCell>{formatCurrency(product.price)}</TableCell>
@@ -414,12 +399,12 @@ export default function Admin() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button variant="outline" size="sm">
-                                <Edit size={14} className="mr-1" /> Edit
+                            <div className="flex justify-end space-x-2">
+                              <Button size="sm" variant="outline">
+                                <Edit size={14} />
                               </Button>
-                              <Button variant="destructive" size="sm">
-                                <Trash2 size={14} className="mr-1" /> Delete
+                              <Button size="sm" variant="outline" className="text-destructive">
+                                <Trash2 size={14} />
                               </Button>
                             </div>
                           </TableCell>
@@ -437,83 +422,16 @@ export default function Admin() {
         <TabsContent value="customers">
           <Card>
             <CardHeader>
-              <CardTitle>Customer Management</CardTitle>
+              <CardTitle>Customers Management</CardTitle>
               <CardDescription>View and manage customer accounts</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center mb-6">
-                <div className="relative w-72">
-                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                  <Input className="pl-8" placeholder="Search customers..." />
+              <div className="text-center py-12 text-gray-500">
+                <div className="mb-4">
+                  <Users size={48} className="mx-auto text-gray-400" />
                 </div>
-                
-                <div className="text-sm text-gray-500">
-                  Showing 5 customers
-                </div>
-              </div>
-              
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Customer</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Orders</TableHead>
-                      <TableHead>Admin</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">#1</TableCell>
-                      <TableCell>
-                        <div className="font-semibold">Admin User</div>
-                      </TableCell>
-                      <TableCell>admin@organicbeans.com</TableCell>
-                      <TableCell>0</TableCell>
-                      <TableCell>
-                        <Badge variant="success">
-                          <CheckCircle2 size={14} className="mr-1" /> Yes
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit size={14} className="mr-1" /> Edit
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    
-                    {/* Sample customer rows */}
-                    {[...Array(4)].map((_, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">#{i + 2}</TableCell>
-                        <TableCell>
-                          <div className="font-semibold">Customer {i + 1}</div>
-                        </TableCell>
-                        <TableCell>customer{i+1}@example.com</TableCell>
-                        <TableCell>{Math.floor(Math.random() * 5)}</TableCell>
-                        <TableCell>
-                          <Badge variant="destructive">
-                            <XCircle size={14} className="mr-1" /> No
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm">
-                              <Edit size={14} className="mr-1" /> Edit
-                            </Button>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 size={14} className="mr-1" /> Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <h3 className="text-lg font-semibold mb-2">Customer Management Coming Soon</h3>
+                <p>This feature is currently under development.</p>
               </div>
             </CardContent>
           </Card>
@@ -523,112 +441,79 @@ export default function Admin() {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle>Store Settings</CardTitle>
-              <CardDescription>Manage your store configuration</CardDescription>
+              <CardTitle>Admin Settings</CardTitle>
+              <CardDescription>Configure admin dashboard settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">General Settings</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Store Name</label>
-                    <Input value="OrganicBeans" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Contact Email</label>
-                    <Input value="contact@organicbeans.com" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Currency</label>
-                    <Select defaultValue="usd">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="usd">USD ($)</SelectItem>
-                        <SelectItem value="eur">EUR (€)</SelectItem>
-                        <SelectItem value="gbp">GBP (£)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Default Language</label>
-                    <Select defaultValue="en">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="zh">Chinese</SelectItem>
-                        <SelectItem value="ja">Japanese</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Shipping Settings</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Free Shipping Minimum</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2">$</span>
-                      <Input className="pl-8" value="50" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Standard Shipping Rate</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2">$</span>
-                      <Input className="pl-8" value="4.99" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Notification Settings</h3>
-                
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Notifications</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex justify-between items-center">
                     <div>
-                      <label className="text-sm font-medium">Order Confirmation Emails</label>
-                      <p className="text-xs text-gray-500">Send confirmation emails to customers when they place an order</p>
+                      <h4 className="font-medium">New Order Alerts</h4>
+                      <p className="text-sm text-gray-500">Receive notifications when new orders are placed</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <Separator />
+                  
+                  <div className="flex justify-between items-center">
                     <div>
-                      <label className="text-sm font-medium">Low Stock Alerts</label>
-                      <p className="text-xs text-gray-500">Receive notifications when product stock is low</p>
+                      <h4 className="font-medium">Low Stock Alerts</h4>
+                      <p className="text-sm text-gray-500">Get notified when product stock falls below threshold</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                   
-                  <div className="flex items-center justify-between">
+                  <Separator />
+                  
+                  <div className="flex justify-between items-center">
                     <div>
-                      <label className="text-sm font-medium">New Order Notifications</label>
-                      <p className="text-xs text-gray-500">Receive notifications when a new order is placed</p>
+                      <h4 className="font-medium">Abandoned Cart Notifications</h4>
+                      <p className="text-sm text-gray-500">Alerts for abandoned shopping carts</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
                 </div>
               </div>
               
-              <div className="pt-4">
+              <Separator />
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Security</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Session Timeout</h4>
+                    <Select defaultValue="60">
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select timeout" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15">15 minutes</SelectItem>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="60">60 minutes</SelectItem>
+                        <SelectItem value="120">2 hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-2">Admin Activity Logs</h4>
+                    <p className="text-sm text-gray-500">Maintain detailed logs of admin actions</p>
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm">
+                        View Logs
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="flex justify-end">
+                <Button className="mr-2" variant="outline">Cancel</Button>
                 <Button>Save Settings</Button>
               </div>
             </CardContent>
