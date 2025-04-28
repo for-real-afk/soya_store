@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, Globe, User, ShoppingCart, Menu, X } from "lucide-react";
+import { ChevronDown, User, ShoppingCart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import NotificationButton from "@/components/NotificationButton";
 
 export default function Header() {
@@ -95,19 +97,7 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             {/* Language Selector */}
             <div className="relative hidden md:block">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button className="flex items-center text-dark hover:text-primary">
-                    <Globe size={18} className="mr-1" /> EN
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-24 p-2">
-                  <button className="block w-full text-left px-3 py-1 hover:bg-light rounded-md">English</button>
-                  <button className="block w-full text-left px-3 py-1 hover:bg-light rounded-md">Español</button>
-                  <button className="block w-full text-left px-3 py-1 hover:bg-light rounded-md">中文</button>
-                  <button className="block w-full text-left px-3 py-1 hover:bg-light rounded-md">日本語</button>
-                </PopoverContent>
-              </Popover>
+              <LanguageSwitcher />
             </div>
             
             {/* User Profile */}
@@ -268,9 +258,7 @@ export default function Header() {
               </Link>
               
               <div className="py-2">
-                <button className="flex items-center">
-                  <Globe size={18} className="mr-2" /> Language: English
-                </button>
+                <LanguageSwitcher />
               </div>
             </nav>
           </div>

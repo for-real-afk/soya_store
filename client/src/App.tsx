@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/context/AuthContext";
 import { ShopProvider } from "@/context/ShopContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
@@ -21,6 +22,7 @@ import Admin from "@/pages/Admin";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Chatbot from "@/components/Chatbot";
 
 function Router() {
   return (
@@ -62,16 +64,19 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light">
-        <AuthProvider>
-          <ShopProvider>
-            <TooltipProvider>
-              <Layout>
-                <Router />
-              </Layout>
-              <Toaster />
-            </TooltipProvider>
-          </ShopProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <ShopProvider>
+              <TooltipProvider>
+                <Layout>
+                  <Router />
+                </Layout>
+                <Chatbot />
+                <Toaster />
+              </TooltipProvider>
+            </ShopProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
