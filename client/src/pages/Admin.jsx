@@ -8,11 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch"; // Import the Switch component
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatCurrency } from "@/lib/utils";
 import OrderStatus from "@/components/OrderStatus";
+import ProductEditDialog from "@/components/ProductEditDialog";
+import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
+import CustomerDetails from "@/components/CustomerDetails";
 // Import Chart.js components
 import {
   Chart as ChartJS,
@@ -65,6 +68,13 @@ export default function Admin() {
   const { toast } = useToast();
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   
+  // State for dialogs
+  const [activeProductDialog, setActiveProductDialog] = useState({ isOpen: false, product: null, isNew: false });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  
   // Fetch products
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ['/api/products'],
@@ -73,6 +83,11 @@ export default function Admin() {
   // Fetch orders
   const { data: orders = [], isLoading: isLoadingOrders } = useQuery({
     queryKey: ['/api/orders'],
+  });
+  
+  // Fetch users
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['/api/users'],
   });
   
   // Mutation for updating order status
@@ -643,7 +658,7 @@ export default function Admin() {
                     </div>
                   </div>
                   
-                  <Button>
+                  <Button onClick={() => setActiveProductDialog({ isOpen: true, product: null, isNew: true })}>
                     <Plus size={16} className="mr-2" /> Add Product
                   </Button>
                 </div>
@@ -695,10 +710,22 @@ export default function Admin() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
-                                <Button variant="outline" size="icon">
+                                <Button 
+                                  variant="outline" 
+                                  size="icon"
+                                  onClick={() => setActiveProductDialog({ isOpen: true, product, isNew: false })}
+                                >
                                   <Edit size={16} />
                                 </Button>
-                                <Button variant="outline" size="icon" className="text-destructive">
+                                <Button 
+                                  variant="outline" 
+                                  size="icon" 
+                                  className="text-destructive"
+                                  onClick={() => {
+                                    setProductToDelete(product);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                >
                                   <Trash2 size={16} />
                                 </Button>
                               </div>
