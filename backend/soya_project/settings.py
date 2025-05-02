@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    
+    'drf_yasg',    
     # Custom apps
     'soya_store',
 ]
@@ -192,6 +192,7 @@ REST_FRAMEWORK = {
     },
     # Exception handling
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 # JWT Settings

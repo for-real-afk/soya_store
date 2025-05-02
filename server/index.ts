@@ -5,6 +5,7 @@ import { setupDjangoProxy } from "./django-proxy";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
+import 'dotenv/config';
 
 const app = express();
 
@@ -90,12 +91,12 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
+
     // Handle preflight requests
     if (req.method === 'OPTIONS') {
       return res.status(204).end();
     }
-    
+
     next();
   });
 
@@ -103,25 +104,25 @@ app.use((req, res, next) => {
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     // Log the error for server-side debugging
     console.error(`Error [${req.method} ${req.path}]:`, err);
-    
+
     // Determine status code
     const status = err.status || err.statusCode || 500;
-    
+
     // Create appropriate error message based on environment
     const isProd = process.env.NODE_ENV === 'production';
     let message = err.message || "Internal Server Error";
     let details = isProd ? undefined : err.stack;
-    
+
     // Handle specific error types
     if (err.name === 'ValidationError') {
-      return res.status(400).json({ 
-        message: 'Validation Error', 
-        errors: err.errors || err.details || message 
+      return res.status(400).json({
+        message: 'Validation Error',
+        errors: err.errors || err.details || message
       });
     }
-    
+
     // Default error response
-    res.status(status).json({ 
+    res.status(status).json({
       message,
       ...(details && { details }),
       timestamp: new Date().toISOString()
@@ -141,11 +142,7 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  server.listen(port, 'localhost', () => {
+    log(`🚀 Server is running at http://localhost:${port}`);
   });
 })();

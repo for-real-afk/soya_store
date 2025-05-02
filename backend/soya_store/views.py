@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate
 from django.db.models import Q
 from .models import User, Product, Order, Notification
 from .serializers import UserSerializer, ProductSerializer, OrderSerializer, NotificationSerializer
+from django.http import JsonResponse
+from django.urls import path
 
 class IsAdminUser(permissions.BasePermission):
     """
@@ -294,3 +296,17 @@ def register_view(request):
     # Log validation errors
     logger.info(f"Registration validation errors: {serializer.errors}")
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+def api_overview(request):
+    api_urls = {
+        'Login': '/api/token/',
+        'Refresh Token': '/api/token/refresh/',
+        'Verify Token': '/api/token/verify/',
+        # Add your other endpoints here
+    }
+    return JsonResponse(api_urls)
+
+# Then add this to urlpatterns:
+path('api/overview/', api_overview, name='api-overview'),
